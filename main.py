@@ -17,10 +17,13 @@ import sugar_grain
 import bucket
 import level
 import message_display
+import soundmanager as sm
 
 class Game:
     def __init__(self) -> None:
         pg.init()
+        self.soundmanager = sm.soundmanager()
+        
         self.screen = pg.display.set_mode(RES)
         self.clock = pg.time.Clock()
         self.iter = 0
@@ -54,8 +57,12 @@ class Game:
         self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  # Scale to screen resolution
         
         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Load in 2 seconds
+        self.soundmanager.play_sound("loading")
+
 
     def load_level(self, levelnumber=0):
+        
+
         # Destroy any current game objects
         for item in self.sugar_grains:
             item.delete()  # Delete all sugar grains
@@ -90,6 +97,7 @@ class Game:
             self.total_sugar_count = self.level.data['number_sugar_grains']
             pg.time.set_timer(START_FLOW, 5 * 1000)  # 5 seconds
             self.message_display.show_message("Level Up", 10)
+            self.soundmanager.play_sound("completion")
             self.level_complete = False
             return True
 

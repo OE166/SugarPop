@@ -10,6 +10,7 @@ import pygame as pg
 import pymunk
 from settings import SCALE, HEIGHT, WIDTH
 from math import sqrt
+import soundmanager as sm
 
 class Bucket:
     def __init__(self, space, x, y, width, height, needed_sugar):
@@ -23,6 +24,7 @@ class Bucket:
         :param width: Width of the bucket in pixels.
         :param height: Height of the bucket in pixels.
         """
+        self.soundmanager = sm.soundmanager()
         self.space = space
         self.width = width / SCALE
         self.height = height / SCALE
@@ -67,6 +69,8 @@ class Bucket:
         
         :param grains: List of sugar grain objects in the game.
         """
+        
+
         if self.exploded:
             return  # Prevent multiple explosions
 
@@ -90,7 +94,7 @@ class Bucket:
                     dy /= distance
 
                 # Apply a radial impulse (adjust magnitude as needed)
-                impulse_magnitude = 20 / (distance + 0.1)  # Reduce force with distance
+                impulse_magnitude = 10 / (distance + 0.1)  # Reduce force with distance
                 impulse = (dx * impulse_magnitude, dy * impulse_magnitude)
                 grain.body.apply_impulse_at_world_point(impulse, grain.body.position)
 
@@ -98,6 +102,7 @@ class Bucket:
         self.space.remove(self.left_wall, self.right_wall, self.bottom_wall)
 
         self.exploded = True  # Mark the bucket as exploded
+        self.soundmanager.play_sound("exploding_bucket")
         
     def draw(self, screen):
         """
@@ -131,7 +136,6 @@ class Bucket:
             return  # Don't count grains if the bucket has exploded
 
         grain_pos = sugar_grain.body.position
-
         # Get bucket boundaries
         left = self.left_wall.a[0]
         right = self.right_wall.a[0]
@@ -140,9 +144,8 @@ class Bucket:
 
         # Check if the grain's position is within the bucket's bounding box
         if left <= grain_pos.x <= right and bottom <= grain_pos.y <= top:
+            self.soundmanager.play_sound("add_sugar")
             self.count += 1
-            return True  # Indicate that the grain was collected
-
         return False  # Grain not collected
 
     def delete(self):
