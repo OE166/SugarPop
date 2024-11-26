@@ -2,7 +2,7 @@
 # Module Name: Sugar Pop Sugar 'Grain' Module
 # Project: Sugar Pop Program
 # Date: Nov 17, 2024
-# By: Brett W. Huffman
+# By: Brett W. Huffman + Owen Hofman
 # Description: The sugar grain implementation of the sugar pop game
 #############################################################
 import pygame as pg
@@ -19,6 +19,7 @@ class sugar_grain:
         :param y: Initial y position in Pygame coordinates.
         """
         self.space = space
+        self.in_bucket = False
 
         # Convert Pygame coordinates to Pymunk coordinates (Pymunk's Y-axis points upwards)
         pos_x = x / SCALE

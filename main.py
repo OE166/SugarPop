@@ -2,7 +2,7 @@
 # Module Name: Sugar Pop Main Module
 # Project: Sugar Pop Program
 # Date: Nov 17, 2024
-# By: Brett W. Huffman
+# By: Brett W. Huffman + Owen Hofman
 # Description: The main implementation of the sugar pop game
 #############################################################
 
@@ -38,6 +38,7 @@ class Game:
         self.space.gravity = (0, -4.8)  # Gravity pointing downwards in Pymunk's coordinate system
         # Iterations defaults to 10. Higher is more accurate collison detection
         self.space.iterations = 30 
+        self.is_paused = False
 
         self.drawing_lines = []
         self.sugar_grains = []
@@ -124,6 +125,10 @@ class Game:
 
     def update(self):
         '''Update the program physics'''
+
+        if self.is_paused:
+            return
+
         # Keep an overall iterator
         self.iter += 1
         
@@ -234,6 +239,18 @@ class Game:
             if event.type == EXIT_APP or event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
+                
+            # Implementing level Restart
+            elif (event.type == pg.KEYDOWN and event.key == pg.K_r):
+                self.current_level -= 1
+                pg.time.set_timer(LOAD_NEW_LEVEL, 100)
+                # self.soundmanager.play_sound("loading")
+          
+            
+            # Implementing a pause
+            elif (event.type == pg.KEYDOWN and event.key == pg.K_SPACE):
+                self.is_paused = not self.is_paused
+
             elif event.type == pg.MOUSEBUTTONDOWN:
                 self.mouse_down = True
                 # Get mouse position and start a new dynamic line

@@ -2,7 +2,7 @@
 # Module Name: Sugar Pop Bucket Module
 # Project: Sugar Pop Program
 # Date: Nov 17, 2024
-# By: Brett W. Huffman
+# By: Brett W. Huffman + Owen Hofman
 # Description: The bucket implementation of the sugar pop game
 #############################################################
 
@@ -11,6 +11,7 @@ import pymunk
 from settings import SCALE, HEIGHT, WIDTH
 from math import sqrt
 import soundmanager as sm
+import sugar_grain as sg
 
 class Bucket:
     def __init__(self, space, x, y, width, height, needed_sugar):
@@ -71,7 +72,7 @@ class Bucket:
         """
         
 
-        if self.exploded:
+        if self.exploded:#reset the grain's flag for being inside a bucket
             return  # Prevent multiple explosions
 
         # Get the bucket's center position
@@ -144,8 +145,10 @@ class Bucket:
 
         # Check if the grain's position is within the bucket's bounding box
         if left <= grain_pos.x <= right and bottom <= grain_pos.y <= top:
-            self.soundmanager.play_sound("add_sugar")
-            self.count += 1
+            if not sugar_grain.in_bucket:  # If the grain is not yet flagged as in the bucket
+                sugar_grain.in_bucket = True  # Mark it as in the bucket
+                self.soundmanager.play_sound("add_sugar")  # Play the sound
+            self.count += 1  # Increment the bucket's count
         return False  # Grain not collected
 
     def delete(self):
