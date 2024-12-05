@@ -18,6 +18,8 @@ import bucket
 import level
 import message_display
 import soundmanager as sm
+from hud import HUD
+
 
 class Game:
     def __init__(self) -> None:
@@ -29,7 +31,7 @@ class Game:
         self.iter = 0
         
         # Initialize font for HUD
-        self.font = pg.font.SysFont(None, 36)  # Default font, size 36
+        self.hud = HUD(self.screen, font_size=24)
 
         # Create a Pymunk space with gravity
         self.current_level = 0
@@ -50,6 +52,8 @@ class Game:
         self.mouse_down = False
         self.current_line = None
         self.message_display = message_display.MessageDisplay(font_size=72)
+        self.gravity_reversed = False
+
         
         # Load the intro image
         self.intro_image = pg.image.load("./images/SugarPop.png").convert()  # Load the intro image
@@ -178,14 +182,6 @@ class Game:
                 if len(self.sugar_grains) >= self.total_sugar_count:
                     self.level_grain_dropping = False
 
-    def draw_hud(self):
-        """Draw the HUD displaying the number of grains."""
-        # Prepare the text surface
-        if self.total_sugar_count:
-            text_surface = self.font.render(f'{self.total_sugar_count - len(self.sugar_grains)}', True, (255, 255, 255))
-            # Draw the text surface on the screen
-            self.screen.blit(text_surface, (10, 10))  # Position at top-left corner
-
     def draw(self):
         '''Draw the overall game. Should call individual item draw() methods'''
         # Clear the screen
@@ -225,7 +221,15 @@ class Game:
             )
         
         # Draw the heads-up display
-        self.draw_hud()
+        if self.total_sugar_count is None:
+            total_grains = 0
+        else:
+            total_grains = self.total_sugar_count
+        grains_in_spout = total_grains - len(self.sugar_grains)
+        grains_in_buckets = [bucket.count for bucket in self.buckets]
+        level_count = self.current_level
+
+        self.hud.draw(total_grains, grains_in_buckets, grains_in_spout, level_count)
 
         # Show any messages needed        
         self.message_display.draw(self.screen)
@@ -250,6 +254,16 @@ class Game:
             # Implementing a pause
             elif (event.type == pg.KEYDOWN and event.key == pg.K_SPACE):
                 self.is_paused = not self.is_paused
+
+            # Implementing reverse key
+            elif (event.type == pg.KEYDOWN and event.key == pg.K_g):
+                self.gravity_reversed = not self.gravity_reversed
+                if self.gravity_reversed:
+                    self.space.gravity = (0,4.8) # gravity upwards
+                else: 
+                    self.space.gravity = (0,-4.8) # gravity downwards
+    
+
 
             elif event.type == pg.MOUSEBUTTONDOWN:
                 self.mouse_down = True
