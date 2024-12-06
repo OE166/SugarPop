@@ -57,9 +57,10 @@ class Game:
         
         # Load the intro image
         self.intro_image = pg.image.load("./images/SugarPop.png").convert()  # Load the intro image
-        # Get new height based on correct scale
-        scale_height = self.intro_image.get_height() * WIDTH / self.intro_image.get_width()
-        self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  # Scale to screen resolution
+
+        # Stretch the image to fit the screen dimensions
+        self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, HEIGHT))  # Stretch to screen size
+
         
         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Load in 2 seconds
         self.soundmanager.play_sound("loading")
@@ -190,6 +191,17 @@ class Game:
         # Only show the intro screen if we haven't loaded a level yet
         if self.intro_image:
             self.screen.blit(self.intro_image, (0, 0))  # Draw the intro image
+        else:
+            # Draw the heads-up display
+            if self.total_sugar_count is None:
+                total_grains = 0
+            else:
+                total_grains = self.total_sugar_count
+            grains_in_spout = total_grains - len(self.sugar_grains)
+            grains_in_buckets = [bucket.count for bucket in self.buckets]
+            level_count = self.current_level
+
+            self.hud.draw(total_grains, grains_in_buckets, grains_in_spout, level_count)
     
         for bucket in self.buckets:
             bucket.draw(self.screen)
@@ -220,16 +232,7 @@ class Game:
                 5
             )
         
-        # Draw the heads-up display
-        if self.total_sugar_count is None:
-            total_grains = 0
-        else:
-            total_grains = self.total_sugar_count
-        grains_in_spout = total_grains - len(self.sugar_grains)
-        grains_in_buckets = [bucket.count for bucket in self.buckets]
-        level_count = self.current_level
 
-        self.hud.draw(total_grains, grains_in_buckets, grains_in_spout, level_count)
 
         # Show any messages needed        
         self.message_display.draw(self.screen)

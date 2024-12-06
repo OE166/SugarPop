@@ -67,13 +67,11 @@ class Bucket:
     def explode(self, grains):
         """
         Apply a radial force to all grains near the bucket and remove the bucket walls.
-        
+
         :param grains: List of sugar grain objects in the game.
         """
-        
-
-        if self.exploded:#reset the grain's flag for being inside a bucket
-            return  # Prevent multiple explosions
+        if self.exploded:  # Prevent multiple explosions
+            return
 
         # Get the bucket's center position
         bucket_center_x = (self.left_wall.a[0] + self.right_wall.a[0]) / 2
@@ -81,6 +79,11 @@ class Bucket:
 
         # Apply radial force to each grain
         for grain in grains:
+            if grain.in_bucket:  # Only affect grains that were frozen
+                # Release the grain back to dynamic behavior
+                grain.body.body_type = pymunk.Body.DYNAMIC
+                grain.in_bucket = False  # Reset the in-bucket flag
+
             grain_pos = grain.body.position
 
             # Calculate the vector from the bucket center to the grain
@@ -104,6 +107,7 @@ class Bucket:
 
         self.exploded = True  # Mark the bucket as exploded
         self.soundmanager.play_sound("exploding_bucket")
+
         
     def draw(self, screen):
         """
@@ -130,7 +134,7 @@ class Bucket:
     def collect(self, sugar_grain):
         """
         Check if a sugar grain is within the bucket bounds and, if so, increase the bucket's count.
-        
+
         :param sugar_grain: The sugar grain to check.
         """
         if self.exploded:
@@ -148,8 +152,15 @@ class Bucket:
             if not sugar_grain.in_bucket:  # If the grain is not yet flagged as in the bucket
                 sugar_grain.in_bucket = True  # Mark it as in the bucket
                 self.soundmanager.play_sound("add_sugar")  # Play the sound
+            
+            # Check momentum (magnitude of velocity vector)
+            velocity = sugar_grain.body.velocity.length  # Calculate the velocity magnitude
+            if velocity < 0.01:  # Use a very small threshold for near-zero momentum
+                sugar_grain.body.body_type = pymunk.Body.STATIC  # Freeze the grain
+            
             self.count += 1  # Increment the bucket's count
         return False  # Grain not collected
+
 
     def delete(self):
         if not self.exploded:
